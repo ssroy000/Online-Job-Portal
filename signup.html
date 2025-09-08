@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Sign Up - Online Job Portal</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css" />
+	<style>
+		.signup-container {
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--bg);
+			padding: 20px;
+		}
+		
+		.signup-card {
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 40px;
+			box-shadow: var(--shadow);
+			width: 100%;
+			max-width: 500px;
+		}
+		
+		.signup-header {
+			text-align: center;
+			margin-bottom: 32px;
+		}
+		
+		.signup-logo {
+			width: 64px;
+			height: 64px;
+			border-radius: 16px;
+			margin: 0 auto 16px;
+			display: block;
+		}
+		
+		.signup-title {
+			font-size: 28px;
+			font-weight: 700;
+			margin: 0 0 8px;
+			color: var(--text);
+		}
+		
+		.signup-subtitle {
+			color: var(--muted);
+			margin: 0;
+		}
+		
+		.form-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 16px;
+		}
+		
+		.form-group {
+			margin-bottom: 20px;
+		}
+		
+		.form-group.full-width {
+			grid-column: 1 / -1;
+		}
+		
+		.form-label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: var(--text);
+		}
+		
+		.form-input {
+			width: 100%;
+			padding: 12px 16px;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: var(--bg);
+			color: var(--text);
+			font-size: 16px;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+		
+		.form-input:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+		}
+		
+		.form-input.error {
+			border-color: var(--danger);
+		}
+		
+		.form-select {
+			width: 100%;
+			padding: 12px 16px;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: var(--bg);
+			color: var(--text);
+			font-size: 16px;
+			cursor: pointer;
+		}
+		
+		.form-select:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+		}
+		
+		.signup-btn {
+			width: 100%;
+			background: var(--primary);
+			color: white;
+			border: none;
+			border-radius: 12px;
+			padding: 14px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background 0.2s ease, transform 0.1s ease;
+			margin-bottom: 20px;
+		}
+		
+		.signup-btn:hover {
+			background: #1a7ce8;
+		}
+		
+		.signup-btn:active {
+			transform: translateY(1px);
+		}
+		
+		.signup-btn:disabled {
+			background: var(--muted);
+			cursor: not-allowed;
+		}
+		
+		.login-link {
+			text-align: center;
+			color: var(--muted);
+		}
+		
+		.login-link a {
+			color: var(--primary);
+			text-decoration: none;
+			font-weight: 600;
+		}
+		
+		.login-link a:hover {
+			text-decoration: underline;
+		}
+		
+		.error-message {
+			background: rgba(239, 68, 68, 0.1);
+			border: 1px solid rgba(239, 68, 68, 0.3);
+			color: var(--danger);
+			padding: 12px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			font-size: 14px;
+		}
+		
+		.success-message {
+			background: rgba(16, 185, 129, 0.1);
+			border: 1px solid rgba(16, 185, 129, 0.3);
+			color: var(--accent);
+			padding: 12px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			font-size: 14px;
+		}
+		
+		.field-error {
+			color: var(--danger);
+			font-size: 12px;
+			margin-top: 4px;
+		}
+		
+		.password-strength {
+			margin-top: 8px;
+			font-size: 12px;
+		}
+		
+		.strength-bar {
+			height: 4px;
+			background: var(--border);
+			border-radius: 2px;
+			margin-top: 4px;
+			overflow: hidden;
+		}
+		
+		.strength-fill {
+			height: 100%;
+			transition: width 0.3s ease, background-color 0.3s ease;
+			width: 0%;
+		}
+		
+		.strength-weak { background: var(--danger); }
+		.strength-medium { background: #f59e0b; }
+		.strength-strong { background: var(--accent); }
+		
+		@media (max-width: 600px) {
+			.form-row {
+				grid-template-columns: 1fr;
+			}
+			
+			.signup-card {
+				padding: 24px;
+			}
+			
+			.signup-title {
+				font-size: 24px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="app" data-theme="light">
+		<div class="signup-container">
+			<div class="signup-card">
+				<div class="signup-header">
+					<img src="https://dummyimage.com/64x64/1e90ff/ffffff&text=J" alt="JobPortal Logo" class="signup-logo" />
+					<h1 class="signup-title">Create Account</h1>
+					<p class="signup-subtitle">Join thousands of professionals finding their dream jobs</p>
+				</div>
+				
+				<div id="errorMessage" class="error-message" style="display: none;"></div>
+				<div id="successMessage" class="success-message" style="display: none;"></div>
+				
+				<form id="signupForm">
+					<div class="form-row">
+						<div class="form-group">
+							<label for="firstName" class="form-label">First Name</label>
+							<input 
+								type="text" 
+								id="firstName" 
+								name="firstName" 
+								class="form-input" 
+								placeholder="Enter your first name"
+								required 
+							/>
+							<div class="field-error" id="firstNameError"></div>
+						</div>
+						
+						<div class="form-group">
+							<label for="lastName" class="form-label">Last Name</label>
+							<input 
+								type="text" 
+								id="lastName" 
+								name="lastName" 
+								class="form-input" 
+								placeholder="Enter your last name"
+								required 
+							/>
+							<div class="field-error" id="lastNameError"></div>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label for="email" class="form-label">Email Address</label>
+						<input 
+							type="email" 
+							id="email" 
+							name="email" 
+							class="form-input" 
+							placeholder="Enter your email address"
+							required 
+						/>
+						<div class="field-error" id="emailError"></div>
+					</div>
+					
+					<div class="form-group">
+						<label for="password" class="form-label">Password</label>
+						<input 
+							type="password" 
+							id="password" 
+							name="password" 
+							class="form-input" 
+							placeholder="Create a strong password"
+							required 
+						/>
+						<div class="password-strength">
+							<span id="strengthText">Password strength</span>
+							<div class="strength-bar">
+								<div class="strength-fill" id="strengthFill"></div>
+							</div>
+						</div>
+						<div class="field-error" id="passwordError"></div>
+					</div>
+					
+					<div class="form-group">
+						<label for="confirmPassword" class="form-label">Confirm Password</label>
+						<input 
+							type="password" 
+							id="confirmPassword" 
+							name="confirmPassword" 
+							class="form-input" 
+							placeholder="Confirm your password"
+							required 
+						/>
+						<div class="field-error" id="confirmPasswordError"></div>
+					</div>
+					
+					<div class="form-row">
+						<div class="form-group">
+							<label for="role" class="form-label">I am a</label>
+							<select id="role" name="role" class="form-select" required>
+								<option value="">Select your role</option>
+								<option value="job_seeker">Job Seeker</option>
+								<option value="recruiter">Recruiter</option>
+								<option value="employer">Employer</option>
+							</select>
+							<div class="field-error" id="roleError"></div>
+						</div>
+						
+						<div class="form-group">
+							<label for="experience" class="form-label">Experience Level</label>
+							<select id="experience" name="experience" class="form-select">
+								<option value="">Select experience</option>
+								<option value="entry">Entry Level (0-2 years)</option>
+								<option value="mid">Mid Level (3-5 years)</option>
+								<option value="senior">Senior Level (6+ years)</option>
+							</select>
+							<div class="field-error" id="experienceError"></div>
+						</div>
+					</div>
+					
+					<div class="form-group">
+						<label for="location" class="form-label">Location</label>
+						<input 
+							type="text" 
+							id="location" 
+							name="location" 
+							class="form-input" 
+							placeholder="City, Country"
+						/>
+						<div class="field-error" id="locationError"></div>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">
+							<input type="checkbox" id="terms" name="terms" required style="margin-right: 8px;" />
+							I agree to the <a href="#" style="color: var(--primary);">Terms of Service</a> and <a href="#" style="color: var(--primary);">Privacy Policy</a>
+						</label>
+						<div class="field-error" id="termsError"></div>
+					</div>
+					
+					<button type="submit" class="signup-btn" id="signupBtn">
+						Create Account
+					</button>
+				</form>
+				
+				<div class="login-link">
+					Already have an account? <a href="login.html">Sign in here</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		// Theme toggle for signup page
+		const app = document.querySelector('.app');
+		const savedTheme = localStorage.getItem('theme');
+		if (savedTheme) app.setAttribute('data-theme', savedTheme);
+		
+		// Check if already logged in
+		if (localStorage.getItem('isLoggedIn') === 'true') {
+			window.location.href = 'index.html';
+		}
+		
+		// Form validation
+		function validateEmail(email) {
+			const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return re.test(email);
+		}
+		
+		function validatePassword(password) {
+			return {
+				length: password.length >= 8,
+				uppercase: /[A-Z]/.test(password),
+				lowercase: /[a-z]/.test(password),
+				number: /\d/.test(password),
+				special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+			};
+		}
+		
+		function getPasswordStrength(password) {
+			const validation = validatePassword(password);
+			const score = Object.values(validation).filter(Boolean).length;
+			
+			if (score < 3) return { level: 'weak', percentage: 33, text: 'Weak' };
+			if (score < 5) return { level: 'medium', percentage: 66, text: 'Medium' };
+			return { level: 'strong', percentage: 100, text: 'Strong' };
+		}
+		
+		function updatePasswordStrength() {
+			const password = document.getElementById('password').value;
+			const strength = getPasswordStrength(password);
+			const strengthText = document.getElementById('strengthText');
+			const strengthFill = document.getElementById('strengthFill');
+			
+			strengthText.textContent = `Password strength: ${strength.text}`;
+			strengthFill.style.width = `${strength.percentage}%`;
+			strengthFill.className = `strength-fill strength-${strength.level}`;
+		}
+		
+		// Password strength indicator
+		document.getElementById('password').addEventListener('input', updatePasswordStrength);
+		
+		// Show/hide messages
+		function showMessage(message, type = 'error') {
+			const errorEl = document.getElementById('errorMessage');
+			const successEl = document.getElementById('successMessage');
+			
+			errorEl.style.display = 'none';
+			successEl.style.display = 'none';
+			
+			if (type === 'error') {
+				errorEl.textContent = message;
+				errorEl.style.display = 'block';
+			} else {
+				successEl.textContent = message;
+				successEl.style.display = 'block';
+			}
+		}
+		
+		// Clear field errors
+		function clearFieldErrors() {
+			const errorElements = document.querySelectorAll('.field-error');
+			errorElements.forEach(el => el.textContent = '');
+			
+			const inputElements = document.querySelectorAll('.form-input, .form-select');
+			inputElements.forEach(el => el.classList.remove('error'));
+		}
+		
+		// Show field error
+		function showFieldError(fieldId, message) {
+			const field = document.getElementById(fieldId);
+			const errorEl = document.getElementById(fieldId + 'Error');
+			
+			field.classList.add('error');
+			errorEl.textContent = message;
+		}
+		
+		// Generate user ID
+		function generateUserId() {
+			return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+		}
+		
+		// Generate avatar URL
+		function generateAvatarUrl(name) {
+			const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+			return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1e90ff&color=ffffff&size=64`;
+		}
+		
+		// Signup form submission
+		document.getElementById('signupForm').addEventListener('submit', function(e) {
+			e.preventDefault();
+			
+			clearFieldErrors();
+			
+			// Get form data
+			const formData = {
+				firstName: document.getElementById('firstName').value.trim(),
+				lastName: document.getElementById('lastName').value.trim(),
+				email: document.getElementById('email').value.trim().toLowerCase(),
+				password: document.getElementById('password').value,
+				confirmPassword: document.getElementById('confirmPassword').value,
+				role: document.getElementById('role').value,
+				experience: document.getElementById('experience').value,
+				location: document.getElementById('location').value.trim(),
+				terms: document.getElementById('terms').checked
+			};
+			
+			// Validation
+			let isValid = true;
+			
+			// Name validation
+			if (!formData.firstName) {
+				showFieldError('firstName', 'First name is required');
+				isValid = false;
+			}
+			
+			if (!formData.lastName) {
+				showFieldError('lastName', 'Last name is required');
+				isValid = false;
+			}
+			
+			// Email validation
+			if (!formData.email) {
+				showFieldError('email', 'Email is required');
+				isValid = false;
+			} else if (!validateEmail(formData.email)) {
+				showFieldError('email', 'Please enter a valid email address');
+				isValid = false;
+			}
+			
+			// Password validation
+			if (!formData.password) {
+				showFieldError('password', 'Password is required');
+				isValid = false;
+			} else {
+				const passwordValidation = validatePassword(formData.password);
+				if (!passwordValidation.length) {
+					showFieldError('password', 'Password must be at least 8 characters long');
+					isValid = false;
+				} else if (!passwordValidation.uppercase || !passwordValidation.lowercase || !passwordValidation.number) {
+					showFieldError('password', 'Password must contain uppercase, lowercase, and number');
+					isValid = false;
+				}
+			}
+			
+			// Confirm password validation
+			if (!formData.confirmPassword) {
+				showFieldError('confirmPassword', 'Please confirm your password');
+				isValid = false;
+			} else if (formData.password !== formData.confirmPassword) {
+				showFieldError('confirmPassword', 'Passwords do not match');
+				isValid = false;
+			}
+			
+			// Role validation
+			if (!formData.role) {
+				showFieldError('role', 'Please select your role');
+				isValid = false;
+			}
+			
+			// Terms validation
+			if (!formData.terms) {
+				showFieldError('terms', 'You must agree to the terms and conditions');
+				isValid = false;
+			}
+			
+			if (!isValid) {
+				showMessage('Please fix the errors above');
+				return;
+			}
+			
+			// Check if user already exists
+			const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+			const userExists = existingUsers.find(user => user.email === formData.email);
+			
+			if (userExists) {
+				showFieldError('email', 'An account with this email already exists');
+				showMessage('An account with this email already exists. Please try logging in instead.');
+				return;
+			}
+			
+			// Create new user
+			const newUser = {
+				id: generateUserId(),
+				name: `${formData.firstName} ${formData.lastName}`,
+				email: formData.email,
+				password: formData.password, // In real app, this would be hashed
+				role: formData.role,
+				experience: formData.experience,
+				location: formData.location,
+				avatar: generateAvatarUrl(`${formData.firstName} ${formData.lastName}`),
+				createdAt: new Date().toISOString(),
+				profile: {
+					firstName: formData.firstName,
+					lastName: formData.lastName,
+					experience: formData.experience,
+					location: formData.location
+				}
+			};
+			
+			// Store user
+			existingUsers.push(newUser);
+			localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+			
+			// Auto-login the new user
+			const userForSession = {
+				id: newUser.id,
+				name: newUser.name,
+				email: newUser.email,
+				role: newUser.role,
+				avatar: newUser.avatar
+			};
+			
+			localStorage.setItem('currentUser', JSON.stringify(userForSession));
+			localStorage.setItem('isLoggedIn', 'true');
+			
+			// Show success message
+			showMessage('Account created successfully! Redirecting to dashboard...', 'success');
+			
+			// Disable form
+			document.getElementById('signupBtn').disabled = true;
+			document.getElementById('signupBtn').textContent = 'Creating Account...';
+			
+			// Redirect to dashboard
+			setTimeout(() => {
+				window.location.href = 'index.html';
+			}, 2000);
+		});
+	</script>
+</body>
+</html>

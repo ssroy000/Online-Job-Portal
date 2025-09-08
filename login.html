@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Login - Online Job Portal</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css" />
+	<style>
+		.login-container {
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: var(--bg);
+			padding: 20px;
+		}
+		
+		.login-card {
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 40px;
+			box-shadow: var(--shadow);
+			width: 100%;
+			max-width: 400px;
+		}
+		
+		.login-header {
+			text-align: center;
+			margin-bottom: 32px;
+		}
+		
+		.login-logo {
+			width: 64px;
+			height: 64px;
+			border-radius: 16px;
+			margin: 0 auto 16px;
+			display: block;
+		}
+		
+		.login-title {
+			font-size: 28px;
+			font-weight: 700;
+			margin: 0 0 8px;
+			color: var(--text);
+		}
+		
+		.login-subtitle {
+			color: var(--muted);
+			margin: 0;
+		}
+		
+		.form-group {
+			margin-bottom: 20px;
+		}
+		
+		.form-label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: var(--text);
+		}
+		
+		.form-input {
+			width: 100%;
+			padding: 12px 16px;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: var(--bg);
+			color: var(--text);
+			font-size: 16px;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
+		}
+		
+		.form-input:focus {
+			outline: none;
+			border-color: var(--primary);
+			box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+		}
+		
+		.login-btn {
+			width: 100%;
+			background: var(--primary);
+			color: white;
+			border: none;
+			border-radius: 12px;
+			padding: 14px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: background 0.2s ease, transform 0.1s ease;
+			margin-bottom: 20px;
+		}
+		
+		.login-btn:hover {
+			background: #1a7ce8;
+		}
+		
+		.login-btn:active {
+			transform: translateY(1px);
+		}
+		
+		.login-btn:disabled {
+			background: var(--muted);
+			cursor: not-allowed;
+		}
+		
+		.divider {
+			text-align: center;
+			margin: 24px 0;
+			position: relative;
+			color: var(--muted);
+		}
+		
+		.divider::before {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 0;
+			right: 0;
+			height: 1px;
+			background: var(--border);
+		}
+		
+		.divider span {
+			background: var(--panel);
+			padding: 0 16px;
+		}
+		
+		.demo-accounts {
+			background: var(--bg);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 16px;
+			margin-top: 20px;
+		}
+		
+		.demo-title {
+			font-weight: 600;
+			margin-bottom: 12px;
+			color: var(--text);
+		}
+		
+		.demo-account {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 8px 0;
+			border-bottom: 1px solid var(--border);
+		}
+		
+		.demo-account:last-child {
+			border-bottom: none;
+		}
+		
+		.demo-role {
+			font-weight: 600;
+			color: var(--text);
+		}
+		
+		.demo-credentials {
+			font-size: 12px;
+			color: var(--muted);
+		}
+		
+		.error-message {
+			background: rgba(239, 68, 68, 0.1);
+			border: 1px solid rgba(239, 68, 68, 0.3);
+			color: var(--danger);
+			padding: 12px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			font-size: 14px;
+		}
+		
+		.success-message {
+			background: rgba(16, 185, 129, 0.1);
+			border: 1px solid rgba(16, 185, 129, 0.3);
+			color: var(--accent);
+			padding: 12px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			font-size: 14px;
+		}
+		
+		@media (max-width: 480px) {
+			.login-card {
+				padding: 24px;
+			}
+			
+			.login-title {
+				font-size: 24px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="app" data-theme="light">
+		<div class="login-container">
+			<div class="login-card">
+				<div class="login-header">
+					<img src="https://dummyimage.com/64x64/1e90ff/ffffff&text=J" alt="JobPortal Logo" class="login-logo" />
+					<h1 class="login-title">Welcome Back</h1>
+					<p class="login-subtitle">Sign in to your account to continue</p>
+				</div>
+				
+				<div id="errorMessage" class="error-message" style="display: none;"></div>
+				<div id="successMessage" class="success-message" style="display: none;"></div>
+				
+				<form id="loginForm">
+					<div class="form-group">
+						<label for="email" class="form-label">Email Address</label>
+						<input 
+							type="email" 
+							id="email" 
+							name="email" 
+							class="form-input" 
+							placeholder="Enter your email"
+							required 
+						/>
+					</div>
+					
+					<div class="form-group">
+						<label for="password" class="form-label">Password</label>
+						<input 
+							type="password" 
+							id="password" 
+							name="password" 
+							class="form-input" 
+							placeholder="Enter your password"
+							required 
+						/>
+					</div>
+					
+					<button type="submit" class="login-btn" id="loginBtn">
+						Sign In
+					</button>
+				</form>
+				
+				<div class="login-link" style="text-align: center; margin: 20px 0; color: var(--muted);">
+					Don't have an account? <a href="signup.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign up here</a>
+				</div>
+				
+				<div class="divider">
+					<span>Demo Accounts</span>
+				</div>
+				
+				<div class="demo-accounts">
+					<div class="demo-title">Try these demo accounts:</div>
+					
+					<div class="demo-account">
+						<div>
+							<div class="demo-role">Job Seeker</div>
+							<div class="demo-credentials">seeker@demo.com / password123</div>
+						</div>
+						<button class="text-btn" onclick="fillDemo('seeker')">Use</button>
+					</div>
+					
+					<div class="demo-account">
+						<div>
+							<div class="demo-role">Recruiter</div>
+							<div class="demo-credentials">recruiter@demo.com / password123</div>
+						</div>
+						<button class="text-btn" onclick="fillDemo('recruiter')">Use</button>
+					</div>
+					
+					<div class="demo-account">
+						<div>
+							<div class="demo-role">Admin</div>
+							<div class="demo-credentials">admin@demo.com / password123</div>
+						</div>
+						<button class="text-btn" onclick="fillDemo('admin')">Use</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script>
+		// Theme toggle for login page
+		const app = document.querySelector('.app');
+		const savedTheme = localStorage.getItem('theme');
+		if (savedTheme) app.setAttribute('data-theme', savedTheme);
+		
+		// Demo account data
+		const demoAccounts = {
+			seeker: {
+				email: 'seeker@demo.com',
+				password: 'password123',
+				user: {
+					id: 1,
+					name: 'Alex Johnson',
+					email: 'seeker@demo.com',
+					role: 'job_seeker',
+					avatar: 'https://i.pravatar.cc/32?img=12'
+				}
+			},
+			recruiter: {
+				email: 'recruiter@demo.com',
+				password: 'password123',
+				user: {
+					id: 2,
+					name: 'Sarah Wilson',
+					email: 'recruiter@demo.com',
+					role: 'recruiter',
+					avatar: 'https://i.pravatar.cc/32?img=5'
+				}
+			},
+			admin: {
+				email: 'admin@demo.com',
+				password: 'password123',
+				user: {
+					id: 3,
+					name: 'Admin User',
+					email: 'admin@demo.com',
+					role: 'admin',
+					avatar: 'https://i.pravatar.cc/32?img=1'
+				}
+			}
+		};
+		
+		// Fill demo account
+		function fillDemo(accountType) {
+			const account = demoAccounts[accountType];
+			document.getElementById('email').value = account.email;
+			document.getElementById('password').value = account.password;
+		}
+		
+		// Show/hide messages
+		function showMessage(message, type = 'error') {
+			const errorEl = document.getElementById('errorMessage');
+			const successEl = document.getElementById('successMessage');
+			
+			errorEl.style.display = 'none';
+			successEl.style.display = 'none';
+			
+			if (type === 'error') {
+				errorEl.textContent = message;
+				errorEl.style.display = 'block';
+			} else {
+				successEl.textContent = message;
+				successEl.style.display = 'block';
+			}
+		}
+		
+		// Login form submission
+		document.getElementById('loginForm').addEventListener('submit', function(e) {
+			e.preventDefault();
+			
+			const email = document.getElementById('email').value.toLowerCase();
+			const password = document.getElementById('password').value;
+			const loginBtn = document.getElementById('loginBtn');
+			
+			// Disable button during login
+			loginBtn.disabled = true;
+			loginBtn.textContent = 'Signing In...';
+			
+			// Simulate API call delay
+			setTimeout(() => {
+				// Check against demo accounts first
+				let account = Object.values(demoAccounts).find(acc => 
+					acc.email === email && acc.password === password
+				);
+				
+				// If not found in demo accounts, check registered users
+				if (!account) {
+					const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+					const registeredUser = registeredUsers.find(user => 
+						user.email === email && user.password === password
+					);
+					
+					if (registeredUser) {
+						account = {
+							user: {
+								id: registeredUser.id,
+								name: registeredUser.name,
+								email: registeredUser.email,
+								role: registeredUser.role,
+								avatar: registeredUser.avatar
+							}
+						};
+					}
+				}
+				
+				if (account) {
+					// Store user session
+					localStorage.setItem('currentUser', JSON.stringify(account.user));
+					localStorage.setItem('isLoggedIn', 'true');
+					
+					showMessage('Login successful! Redirecting...', 'success');
+					
+					// Redirect to dashboard
+					setTimeout(() => {
+						window.location.href = 'index.html';
+					}, 1000);
+				} else {
+					showMessage('Invalid email or password. Please try again.');
+					loginBtn.disabled = false;
+					loginBtn.textContent = 'Sign In';
+				}
+			}, 1000);
+		});
+		
+		// Check if already logged in
+		if (localStorage.getItem('isLoggedIn') === 'true') {
+			window.location.href = 'index.html';
+		}
+	</script>
+</body>
+</html>
