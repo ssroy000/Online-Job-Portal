@@ -389,6 +389,19 @@
 					// Store user session
 					localStorage.setItem('currentUser', JSON.stringify(account.user));
 					localStorage.setItem('isLoggedIn', 'true');
+					// Fire-and-forget: record login history
+					try {
+						fetch('http://localhost:4000/api/login-history', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								userId: account.user.id,
+								email: account.user.email,
+								role: account.user.role,
+								status: 'success'
+							})
+						}).catch(() => {});
+					} catch (_) {}
 					
 					showMessage('Login successful! Redirecting...', 'success');
 					
@@ -400,6 +413,17 @@
 					showMessage('Invalid email or password. Please try again.');
 					loginBtn.disabled = false;
 					loginBtn.textContent = 'Sign In';
+					// Optional: record failed login attempt
+					try {
+						fetch('http://localhost:4000/api/login-history', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								email,
+								status: 'failed'
+							})
+						}).catch(() => {});
+					} catch (_) {}
 				}
 			}, 1000);
 		});

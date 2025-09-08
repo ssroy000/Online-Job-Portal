@@ -1,0 +1,22 @@
+{
+  "name": "online-job-portal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:server": "node server.js",
+    "dev": "concurrently \"npx live-server --port=5500 --no-browser\" \"node server.js\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
+    "morgan": "^1.10.0",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "live-server": "^1.2.2"
+  }
+}
+

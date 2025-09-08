@@ -27,6 +27,8 @@
 	const jobsSearchInput = document.getElementById('jobsSearchInput');
 	const jobPostForm = document.getElementById('jobPostForm');
 	const postedJobsList = document.getElementById('postedJobsList');
+	const loginHistoryList = document.getElementById('loginHistoryList');
+	const refreshLoginHistoryBtn = document.getElementById('refreshLoginHistory');
 	const applicationTimeline = document.getElementById('applicationTimeline');
 	const skillsChips = document.getElementById('skillsChips');
 	const careerTips = document.getElementById('careerTips');
@@ -39,6 +41,7 @@
 	const filterType = document.getElementById('filterType');
 	const globalSearch = document.getElementById('globalSearch');
 	const dropzone = document.getElementById('dropzone');
+	
 	const resumeInput = document.getElementById('resumeInput');
 	const browseResume = document.getElementById('browseResume');
 	const uploadResult = document.getElementById('uploadResult');
@@ -281,6 +284,36 @@
 		});
 	}
 
+	async function fetchLoginHistory() {
+		if (!loginHistoryList) return;
+		loginHistoryList.innerHTML = '<li class="list-item"><div>Loading...</div></li>';
+		try {
+			const res = await fetch('http://localhost:4000/api/login-history');
+			const data = await res.json();
+			if (!data.ok) throw new Error(data.error || 'Failed');
+			const entries = (data.entries || []).slice(0, 10);
+			loginHistoryList.innerHTML = '';
+			entries.forEach(e => {
+				const li = document.createElement('li');
+				li.className = 'list-item';
+				li.innerHTML = `
+					<img src="https://i.pravatar.cc/40?u=${(e.email||'unknown')}" alt="${e.email||'Unknown'}"/>
+					<div>
+						<div style="font-weight:600">${e.email || 'Unknown'} <span class="badge" style="margin-left:6px">${e.status}</span></div>
+						<div class="job-meta">${new Date(e.ts).toLocaleString()} • ${e.ip || ''}</div>
+					</div>
+					<span class="badge">${e.role || 'n/a'}</span>
+				`;
+				loginHistoryList.appendChild(li);
+			});
+			if (entries.length === 0) {
+				loginHistoryList.innerHTML = '<li class="list-item"><div>No entries yet</div></li>';
+			}
+		} catch (err) {
+			loginHistoryList.innerHTML = '<li class="list-item"><div>Could not load history. Start the server.</div></li>';
+		}
+	}
+
 	// Post form handler
 	if (jobPostForm) {
 		jobPostForm.addEventListener('submit', (e) => {
@@ -311,6 +344,10 @@
 			jobPostForm.reset();
 			alert('Job published');
 		});
+	}
+
+	if (refreshLoginHistoryBtn) {
+		refreshLoginHistoryBtn.addEventListener('click', () => fetchLoginHistory());
 	}
 
 	function renderTimeline() {
@@ -498,6 +535,7 @@
 	// Render jobs section if present
 	renderJobsSearch();
 	renderPostedJobsList();
+	fetchLoginHistory();
 
 	// Hash routing: #dashboard, #jobs, #jobs/post
 	function applyHashRoute() {
