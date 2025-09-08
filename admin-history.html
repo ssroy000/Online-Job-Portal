@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Login History — Admin</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css" />
+	<style>
+		.container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+		.toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+		.toolbar input, .toolbar select { padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--panel); color:var(--text); }
+		table { width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow: var(--shadow); }
+		th, td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); font-size:14px; }
+		th { background: rgba(0,0,0,0.03); font-weight:600; }
+		tr:last-child td { border-bottom:none; }
+		.actions { display:flex; gap:8px; }
+	</style>
+</head>
+<body>
+	<div class="app" data-theme="light">
+		<div class="container">
+			<h1 style="margin:0 0 12px">Login History</h1>
+			<div class="toolbar">
+				<input id="filterEmail" type="search" placeholder="Filter by email" />
+				<select id="filterStatus">
+					<option value="">All status</option>
+					<option>success</option>
+					<option>failed</option>
+				</select>
+				<select id="filterRole">
+					<option value="">All roles</option>
+					<option>job_seeker</option>
+					<option>recruiter</option>
+					<option>admin</option>
+				</select>
+				<button id="refreshBtn" class="text-btn">Refresh</button>
+				<button id="exportBtn" class="apply-btn" style="background:var(--primary);color:white">Export CSV</button>
+				<a href="index.html" class="bookmark-btn" style="text-decoration:none; display:inline-grid; place-items:center; height:36px">Back</a>
+			</div>
+
+			<div class="card">
+				<table>
+					<thead>
+						<tr>
+							<th>Time</th>
+							<th>Email</th>
+							<th>Status</th>
+							<th>Role</th>
+							<th>IP</th>
+							<th>User Agent</th>
+						</tr>
+					</thead>
+					<tbody id="historyBody">
+						<tr><td colspan="6">Loading...</td></tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const app = document.querySelector('.app');
+		const savedTheme = localStorage.getItem('theme');
+		if (savedTheme) app.setAttribute('data-theme', savedTheme);
+
+		const filterEmail = document.getElementById('filterEmail');
+		const filterStatus = document.getElementById('filterStatus');
+		const filterRole = document.getElementById('filterRole');
+		const historyBody = document.getElementById('historyBody');
+
+		let allEntries = [];
+
+		async function loadHistory() {
+			historyBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+			try {
+				const query = filterEmail.value ? ('?email=' + encodeURIComponent(filterEmail.value)) : '';
+				const res = await fetch('http://localhost:4000/api/login-history' + query);
+				const data = await res.json();
+				if (!data.ok) throw new Error(data.error || 'Failed');
+				allEntries = data.entries || [];
+				renderTable();
+			} catch (err) {
+				historyBody.innerHTML = '<tr><td colspan="6">Failed to load. Start the backend.</td></tr>';
+			}
+		}
+
+		function renderTable() {
+			const status = filterStatus.value;
+			const role = filterRole.value;
+			const rows = allEntries
+				.filter(e => !status || e.status === status)
+				.filter(e => !role || e.role === role)
+				.slice(0, 500)
+				.map(e => `
+					<tr>
+						<td>${new Date(e.ts).toLocaleString()}</td>
+						<td>${e.email || ''}</td>
+						<td><span class="badge">${e.status}</span></td>
+						<td>${e.role || ''}</td>
+						<td>${e.ip || ''}</td>
+						<td title="${(e.userAgent||'').replaceAll('"','')}">${(e.userAgent||'').slice(0,64)}${(e.userAgent||'').length>64?'…':''}</td>
+					</tr>
+				`).join('');
+			historyBody.innerHTML = rows || '<tr><td colspan="6">No results</td></tr>';
+		}
+
+		function exportCSV() {
+			const headers = ['time','email','status','role','ip','userAgent'];
+			const status = filterStatus.value;
+			const role = filterRole.value;
+			const filtered = allEntries
+				.filter(e => !status || e.status === status)
+				.filter(e => !role || e.role === role);
+			const lines = [headers.join(',')].concat(
+				filtered.map(e => [
+					new Date(e.ts).toISOString(),
+					escapeCSV(e.email||''),
+					escapeCSV(e.status||''),
+					escapeCSV(e.role||''),
+					escapeCSV(e.ip||''),
+					escapeCSV(e.userAgent||'')
+				].join(','))
+			);
+			const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `login-history-${Date.now()}.csv`;
+			a.click();
+			URL.revokeObjectURL(url);
+		}
+
+		function escapeCSV(v){
+			if (v == null) return '';
+			const s = String(v).replaceAll('"', '""');
+			return /[",\n]/.test(s) ? '"' + s + '"' : s;
+		}
+
+		document.getElementById('refreshBtn').addEventListener('click', loadHistory);
+		document.getElementById('exportBtn').addEventListener('click', exportCSV);
+		[filterStatus, filterRole].forEach(el => el.addEventListener('change', renderTable));
+		filterEmail.addEventListener('input', () => { clearTimeout(filterEmail._t); filterEmail._t = setTimeout(loadHistory, 300); });
+
+		loadHistory();
+	</script>
+</body>
+</html>
+
+
