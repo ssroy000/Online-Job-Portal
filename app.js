@@ -16,6 +16,17 @@
 	const tabs = document.querySelectorAll('.tab');
 	const tabPanels = document.querySelectorAll('.tab-panel');
 	const jobsList = document.getElementById('jobsList');
+	const sectionDashboard = document.getElementById('dashboard');
+	const sectionJobs = document.getElementById('jobs');
+	const sidebarNavItems = document.querySelectorAll('.nav-item');
+	// Jobs section controls
+	const jobsSearchList = document.getElementById('jobsSearchList');
+	const jobsFilterLocation = document.getElementById('jobsFilterLocation');
+	const jobsFilterExperience = document.getElementById('jobsFilterExperience');
+	const jobsFilterType = document.getElementById('jobsFilterType');
+	const jobsSearchInput = document.getElementById('jobsSearchInput');
+	const jobPostForm = document.getElementById('jobPostForm');
+	const postedJobsList = document.getElementById('postedJobsList');
 	const applicationTimeline = document.getElementById('applicationTimeline');
 	const skillsChips = document.getElementById('skillsChips');
 	const careerTips = document.getElementById('careerTips');
@@ -76,15 +87,41 @@
 		}
 	});
 
-	// Tabs
-	tabs.forEach(tab => {
-		tab.addEventListener('click', () => {
-			tabs.forEach(t => t.classList.remove('active'));
-			tabPanels.forEach(p => p.classList.remove('active'));
-			tab.classList.add('active');
-			document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+	// Tabs (global across sections)
+	function setupTabs(root) {
+		const localTabs = (root || document).querySelectorAll('.tab');
+		const localPanels = (root || document).querySelectorAll('.tab-panel');
+		localTabs.forEach(tab => {
+			tab.addEventListener('click', () => {
+				// scope by closest section to avoid interfering with other sections
+				const section = tab.closest('.section');
+				const scopedTabs = section.querySelectorAll('.tab');
+				const scopedPanels = section.querySelectorAll('.tab-panel');
+				scopedTabs.forEach(t => t.classList.remove('active'));
+				scopedPanels.forEach(p => p.classList.remove('active'));
+				tab.classList.add('active');
+				section.querySelector('#' + tab.getAttribute('data-tab')).classList.add('active');
+			});
 		});
-	});
+	}
+	setupTabs(document);
+
+	// Sidebar navigation to switch sections
+	function showSection(sectionId) {
+		[sectionDashboard, sectionJobs].forEach(sec => { if (sec) sec.setAttribute('data-visible', sec && sec.id === sectionId ? 'true' : 'false'); });
+		// update active state
+		sidebarNavItems.forEach(item => {
+			item.classList.toggle('active', item.getAttribute('data-section') === sectionId);
+		});
+	}
+	if (sidebarNavItems.length) {
+		sidebarNavItems.forEach(item => {
+			item.addEventListener('click', () => {
+				const sectionId = item.getAttribute('data-section');
+				if (sectionId) showSection(sectionId);
+			});
+		});
+	}
 
 	// Sample Data
 	const allJobs = [
@@ -94,6 +131,11 @@
 		{ id: 'j4', company: 'Soylent', logo: 'https://dummyimage.com/48x48/10b981/ffffff&text=S', title: 'Data Analyst', salary: '$65k - $85k', location: 'Remote', type: 'Part-time', level: 'Entry' },
 		{ id: 'j5', company: 'Umbrella', logo: 'https://dummyimage.com/48x48/f59e0b/ffffff&text=U', title: 'DevOps Engineer', salary: '$100k - $130k', location: 'Remote', type: 'Full-time', level: 'Senior' }
 	];
+
+	// Posted jobs persistence
+	const storedPostedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
+	let postedJobs = Array.isArray(storedPostedJobs) ? storedPostedJobs : [];
+	function savePostedJobs() { localStorage.setItem('postedJobs', JSON.stringify(postedJobs)); }
 
 	const applicationEvents = [
 		{ stage: 'Applied', desc: 'You applied to Frontend Developer at Acme', date: '2025-09-01' },
@@ -137,7 +179,7 @@
 		const lvl = filterExperience.value || '';
 		const type = filterType.value || '';
 		const q = (globalSearch.value || '').toLowerCase();
-		const filtered = allJobs.filter(j =>
+		const filtered = allJobs.concat(postedJobs).filter(j =>
 			(!loc || j.location === loc) && (!lvl || j.level === lvl) && (!type || j.type === type) &&
 			(!q || `${j.company} ${j.title} ${j.location}`.toLowerCase().includes(q))
 		);
@@ -157,6 +199,87 @@
 				</div>
 			`;
 			jobsList.appendChild(item);
+		});
+	}
+
+	// Jobs section: render search list with its own filters
+	function renderJobsSearch() {
+		if (!jobsSearchList) return;
+		const loc = jobsFilterLocation ? (jobsFilterLocation.value || '') : '';
+		const lvl = jobsFilterExperience ? (jobsFilterExperience.value || '') : '';
+		const type = jobsFilterType ? (jobsFilterType.value || '') : '';
+		const q = jobsSearchInput ? (jobsSearchInput.value || '').toLowerCase() : '';
+		const filtered = allJobs.concat(postedJobs).filter(j =>
+			(!loc || j.location === loc) && (!lvl || j.level === lvl) && (!type || j.type === type) &&
+			(!q || `${j.company} ${j.title} ${j.location}`.toLowerCase().includes(q))
+		);
+		jobsSearchList.innerHTML = '';
+		filtered.forEach(job => {
+			const item = document.createElement('div');
+			item.className = 'job-card';
+			item.innerHTML = `
+				<img src="${job.logo || 'https://dummyimage.com/48x48/374151/ffffff&text=J'}" alt="${job.company}" width="48" height="48" style="border-radius:10px"/>
+				<div>
+					<div style="font-weight:600">${job.title}</div>
+					<div class="job-meta">${job.company} • ${job.location} • ${job.salary || ''}</div>
+				</div>
+				<div style="display:flex; gap:6px; align-items:center;">
+					<button class="apply-btn">Apply</button>
+				</div>
+			`;
+			jobsSearchList.appendChild(item);
+		});
+	}
+
+	function renderPostedJobsList() {
+		if (!postedJobsList) return;
+		postedJobsList.innerHTML = '';
+		postedJobs.forEach(job => {
+			const item = document.createElement('div');
+			item.className = 'job-card';
+			item.innerHTML = `
+				<img src="${job.logo || 'https://dummyimage.com/48x48/1e90ff/ffffff&text=' + (job.company?.[0] || 'J')}" alt="${job.company}" width="48" height="48" style="border-radius:10px"/>
+				<div>
+					<div style="font-weight:600">${job.title}</div>
+					<div class="job-meta">${job.company} • ${job.location} • ${job.salary || ''}</div>
+				</div>
+				<div style="display:flex; gap:6px; align-items:center;">
+					<span class="badge">${job.type} • ${job.level}</span>
+				</div>
+			`;
+			postedJobsList.appendChild(item);
+		});
+	}
+
+	// Post form handler
+	if (jobPostForm) {
+		jobPostForm.addEventListener('submit', (e) => {
+			e.preventDefault();
+			const title = document.getElementById('postTitle').value.trim();
+			const company = document.getElementById('postCompany').value.trim();
+			const salary = document.getElementById('postSalary').value.trim();
+			const location = document.getElementById('postLocation').value.trim();
+			const type = document.getElementById('postType').value;
+			const level = document.getElementById('postLevel').value;
+			const description = document.getElementById('postDescription').value.trim();
+			if (!title || !company || !location) return;
+			const newJob = {
+				id: 'p' + Date.now(),
+				company,
+				title,
+				salary,
+				location,
+				type,
+				level,
+				logo: 'https://dummyimage.com/48x48/0ea5e9/ffffff&text=' + (company[0] || 'J'),
+				description
+			};
+			postedJobs.unshift(newJob);
+			savePostedJobs();
+			renderPostedJobsList();
+			renderJobsSearch();
+			jobPostForm.reset();
+			alert('Job published');
 		});
 	}
 
@@ -254,11 +377,17 @@
 	}
 
 	// Events and interactions
-	[filterLocation, filterExperience, filterType].forEach(el => el.addEventListener('change', renderJobs));
+	[filterLocation, filterExperience, filterType].forEach(el => el && el.addEventListener('change', renderJobs));
 	if (globalSearch) globalSearch.addEventListener('input', () => {
 		// Debounce-lite
 		clearTimeout(globalSearch._t);
 		globalSearch._t = setTimeout(renderJobs, 200);
+	});
+	// Jobs section filter bindings
+	[jobsFilterLocation, jobsFilterExperience, jobsFilterType].forEach(el => el && el.addEventListener('change', renderJobsSearch));
+	if (jobsSearchInput) jobsSearchInput.addEventListener('input', () => {
+		clearTimeout(jobsSearchInput._t);
+		jobsSearchInput._t = setTimeout(renderJobsSearch, 200);
 	});
 	if (refreshRecommendations) refreshRecommendations.addEventListener('click', () => {
 		allJobs.sort(() => Math.random() - 0.5);
@@ -335,4 +464,7 @@
 	renderTalent();
 	renderChart();
 	window.addEventListener('resize', renderChart);
+	// Render jobs section if present
+	renderJobsSearch();
+	renderPostedJobsList();
 })(); 

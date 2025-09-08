@@ -199,6 +199,87 @@
 					</div>
 				</div>
 			</section>
+			<section class="section" id="jobs" data-visible="false">
+				<header class="section-header">
+					<h1>Jobs</h1>
+					<div class="tabs" role="tablist">
+						<button class="tab active" role="tab" data-tab="jobs-search">Search</button>
+						<button class="tab" role="tab" data-tab="jobs-post">Post</button>
+					</div>
+				</header>
+
+				<div class="tab-panels">
+					<div class="tab-panel active" id="jobs-search">
+						<div class="filters" style="margin-bottom:12px">
+							<select id="jobsFilterLocation" aria-label="Filter by location">
+								<option value="">All locations</option>
+								<option>Remote</option>
+								<option>Kolkata</option>
+								<option>Mumbai</option>
+								<option>Pune</option>
+							</select>
+							<select id="jobsFilterExperience" aria-label="Filter by experience">
+								<option value="">All experience</option>
+								<option>Entry</option>
+								<option>Mid</option>
+								<option>Senior</option>
+							</select>
+							<select id="jobsFilterType" aria-label="Filter by job type">
+								<option value="">All types</option>
+								<option>Full-time</option>
+								<option>Part-time</option>
+								<option>Contract</option>
+							</select>
+							<div class="search" style="min-width:280px">
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+								<input id="jobsSearchInput" type="search" placeholder="Search roles, companies..." aria-label="Search" />
+							</div>
+						</div>
+						<div class="jobs-grid" id="jobsSearchList"></div>
+					</div>
+
+					<div class="tab-panel" id="jobs-post">
+						<div class="card">
+							<div class="card-header"><h2>Create a Job Post</h2></div>
+							<form id="jobPostForm" class="jobs-post-form">
+								<div class="section-split">
+									<div class="card" style="box-shadow:none">
+										<label>Title<br><input id="postTitle" type="text" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)"></label>
+										<label>Company<br><input id="postCompany" type="text" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)"></label>
+										<label>Salary<br><input id="postSalary" type="text" placeholder="$80k - $100k" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)"></label>
+									</div>
+									<div class="card" style="box-shadow:none">
+										<label>Location<br><input id="postLocation" type="text" placeholder="Remote / City" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)"></label>
+										<label>Type<br>
+											<select id="postType" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)">
+												<option>Full-time</option>
+												<option>Part-time</option>
+												<option>Contract</option>
+											</select>
+										</label>
+										<label>Level<br>
+											<select id="postLevel" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text)">
+												<option>Entry</option>
+												<option>Mid</option>
+												<option>Senior</option>
+											</select>
+										</label>
+									</div>
+								</div>
+								<label>Description<br><textarea id="postDescription" rows="5" placeholder="Role description..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text)"></textarea></label>
+								<div style="margin-top:10px;display:flex;gap:8px">
+									<button type="submit" class="apply-btn" style="background:var(--primary);color:white">Publish</button>
+									<button type="reset" class="bookmark-btn">Reset</button>
+								</div>
+							</form>
+						</div>
+						<div class="card" style="margin-top:12px">
+							<div class="card-header"><h2>Your Job Posts</h2></div>
+							<div class="jobs-grid" id="postedJobsList"></div>
+						</div>
+					</div>
+				</div>
+			</section>
 		</main>
 	</div>
 	<script src="app.js"></script>
