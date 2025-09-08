@@ -113,14 +113,44 @@
 		sidebarNavItems.forEach(item => {
 			item.classList.toggle('active', item.getAttribute('data-section') === sectionId);
 		});
+		// keep hash in sync if user uses programmatic navigation
+		if (sectionId === 'jobs' && location.hash !== '#jobs' && !location.hash.startsWith('#jobs/')) {
+			location.hash = '#jobs';
+		}
+		if (sectionId === 'dashboard' && location.hash !== '#dashboard') {
+			location.hash = '#dashboard';
+		}
 	}
 	if (sidebarNavItems.length) {
 		sidebarNavItems.forEach(item => {
 			item.addEventListener('click', () => {
 				const sectionId = item.getAttribute('data-section');
-				if (sectionId) showSection(sectionId);
+				if (sectionId) {
+					showSection(sectionId);
+					// update URL hash for deep linking
+					if (sectionId === 'jobs') location.hash = '#jobs';
+					if (sectionId === 'dashboard') location.hash = '#dashboard';
+				}
 			});
 		});
+	}
+
+	// Role-based UI visibility (recruiter-only post tab)
+	function applyRoleVisibility() {
+		const isRecruiter = currentUser.role === 'recruiter';
+		const jobsSection = document.getElementById('jobs');
+		if (!jobsSection) return;
+		const postTabButton = jobsSection.querySelector(".tab[data-tab='jobs-post']");
+		const postPanel = jobsSection.querySelector('#jobs-post');
+		if (postTabButton && postPanel) {
+			postTabButton.style.display = isRecruiter ? '' : 'none';
+			if (!isRecruiter && postPanel.classList.contains('active')) {
+				postPanel.classList.remove('active');
+				const searchTab = jobsSection.querySelector(".tab[data-tab='jobs-search']");
+				const searchPanel = jobsSection.querySelector('#jobs-search');
+				if (searchTab && searchPanel) { searchTab.classList.add('active'); searchPanel.classList.add('active'); }
+			}
+		}
 	}
 
 	// Sample Data
@@ -457,6 +487,7 @@
 	
 	// Initial render
 	updateDataForUser();
+	applyRoleVisibility();
 	renderJobs();
 	renderTimeline();
 	renderInsights();
@@ -467,4 +498,33 @@
 	// Render jobs section if present
 	renderJobsSearch();
 	renderPostedJobsList();
+
+	// Hash routing: #dashboard, #jobs, #jobs/post
+	function applyHashRoute() {
+		const hash = (location.hash || '').toLowerCase();
+		if (hash.startsWith('#jobs')) {
+			showSection('jobs');
+			const isRecruiter = currentUser.role === 'recruiter';
+			const jobsSection = document.getElementById('jobs');
+			if (jobsSection) {
+				const searchTab = jobsSection.querySelector(".tab[data-tab='jobs-search']");
+				const postTab = jobsSection.querySelector(".tab[data-tab='jobs-post']");
+				const searchPanel = jobsSection.querySelector('#jobs-search');
+				const postPanel = jobsSection.querySelector('#jobs-post');
+				// reset
+				[searchTab, postTab].forEach(t => t && t.classList.remove('active'));
+				[searchPanel, postPanel].forEach(p => p && p.classList.remove('active'));
+				if (hash === '#jobs/post' && isRecruiter && postTab && postPanel) {
+					postTab.classList.add('active');
+					postPanel.classList.add('active');
+				} else {
+					if (searchTab && searchPanel) { searchTab.classList.add('active'); searchPanel.classList.add('active'); }
+				}
+			}
+		} else {
+			showSection('dashboard');
+		}
+	}
+	window.addEventListener('hashchange', applyHashRoute);
+	applyHashRoute();
 })(); 
