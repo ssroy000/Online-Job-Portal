@@ -17,11 +17,13 @@ npm run dev:server
 
 Data saved to `data/login-history.json`.
 
-Backend (server.js, package.json, .gitignore, README.md)
-Frontend integration (login.html, index.html, app.js)
-Everything is live locally at:
-Backend: http://localhost:4000
-Frontend: http://127.0.0.1:5500/login.html
+-Backend (server.js, package.json, .gitignore, README.md)
+-Frontend integration (login.html, index.html, app.js)
+-Everything is live locally at:
+-Backend: http://localhost:4000
+-POST http://localhost:4000/api/login-history
+-GET http://localhost:4000/api/login-history?email=you@example.com
+-Frontend: http://127.0.0.1:5500/login.html
 
 ## Frontend integration
 - On login success/failure, the app posts to the backend.
